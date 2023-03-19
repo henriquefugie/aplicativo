@@ -1,115 +1,240 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 
-void main() {
-  runApp(const MyApp());
-}
+import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
+
+import 'Screens/splashscreen.dart';
+
+void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // Try running your application with "flutter run". You'll see the
-        // application has a blue toolbar. Then, without quitting the app, try
-        // changing the primarySwatch below to Colors.green and then invoke
-        // "hot reload" (press "r" in the console where you ran "flutter run",
-        // or simply save your changes to "hot reload" in a Flutter IDE).
-        // Notice that the counter didn't reset back to zero; the application
-        // is not restarted.
-        primarySwatch: Colors.blue,
-      ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      title: 'Visita Técnica',
+      home: SplashScreen(),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
-
+class HomePage extends StatefulWidget {
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  _HomePageState createState() => _HomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+class _HomePageState extends State<HomePage> {
+  List<File> _images = [];
+  List<String> _texts = [];
+  bool _isChecked1 = false;
+  bool _isChecked2 = false;
 
-  void _incrementCounter() {
+  void _addImage() async {
+    final imagePicker = ImagePicker();
+    final pickedFile =
+        await imagePicker.getImage(source: ImageSource.gallery);
+
+    if (pickedFile != null) {
+      final directory = await getApplicationDocumentsDirectory();
+      final path = directory.path;
+      final file = File('${path}/${DateTime.now().toString()}.jpg');
+
+      setState(() {
+        _images.add(file);
+      });
+
+      await file.writeAsBytes(await pickedFile.readAsBytes());
+    }
+  }
+
+  void _addText(String text) {
     setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
+      _texts.add(text);
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
     return Scaffold(
       appBar: AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
+        title: Text('Visita Técnica'),
       ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
+      body: Padding(
+        padding: EdgeInsets.all(16.0),
         child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Invoke "debug painting" (press "p" in the console, choose the
-          // "Toggle Debug Paint" action from the Flutter Inspector in Android
-          // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-          // to see the wireframe for each widget.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Text Field 1'),
+            TextField(
+              onChanged: (text) {
+                _addText(text);
+              },
             ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
+            SizedBox(height: 16.0),
+            Text('Text Field 2'),
+            TextField(
+              onChanged: (text) {
+                _addText(text);
+              },
+            ),
+            SizedBox(height: 16.0),
+            Text('Text Field 3'),
+            TextField(
+              onChanged: (text) {
+                _addText(text);
+              },
+            ),
+            SizedBox(height: 16.0),
+            CheckboxListTile(
+              title: Text('Check Box 1'),
+              value: _isChecked1,
+              onChanged: (newValue) {
+                setState(() {
+                  _isChecked1 = newValue!;
+                });
+              },
+            ),
+            CheckboxListTile(
+              title: Text('Check Box 2'),
+              value: _isChecked2,
+              onChanged: (newValue) {
+                setState(() {
+                  _isChecked2 = newValue!;
+                });
+              },
+            ),
+            SizedBox(height: 16.0),
+            ElevatedButton(
+              onPressed: () {
+                _addImage();
+              },
+              child: Text('Add Image'),
+            ),
+            SizedBox(height: 16.0),
+            Expanded(
+              child: GridView.count(
+                crossAxisCount: 3,
+                mainAxisSpacing: 16.0,
+                crossAxisSpacing: 16.0,
+                children: List.generate(_images.length, (index) {
+                  return Image.file(
+                    _images[index],
+                    fit: BoxFit.cover,
+                  );
+                }),
+              ),
+            ),
+            SizedBox(height: 16.0),
+            Expanded(
+              child: ListView.builder(
+                itemCount: _texts.length,
+                itemBuilder: (context, index) {
+                  return ListTile(
+                    title: Text(_texts[index]),
+                  );
+                },
+              ),
             ),
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+      );
+  }
+}
+
+class MyFormWidget extends StatefulWidget {
+  @override
+  _MyFormWidgetState createState() => _MyFormWidgetState();
+}
+
+class _MyFormWidgetState extends State<MyFormWidget> {
+  final _formKey = GlobalKey<FormState>();
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('My Form'),
+      ),
+      body: Padding(
+        padding: EdgeInsets.all(16),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Group 1', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              TextFormField(
+                decoration: InputDecoration(labelText: 'Field 1'),
+                validator: (value) {
+                  if (value!.isEmpty) {
+                    return 'Please enter a value';
+                  }
+                  return null;
+                },
+              ),
+              TextFormField(
+                decoration: InputDecoration(labelText: 'Field 2'),
+                validator: (value) {
+                  if (value!.isEmpty) {
+                    return 'Please enter a value';
+                  }
+                  return null;
+                },
+              ),
+              SizedBox(height: 20),
+              Text('Group 2', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              TextFormField(
+                decoration: InputDecoration(labelText: 'Field 3'),
+                validator: (value) {
+                  if (value!.isEmpty) {
+                    return 'Please enter a value';
+                  }
+                  return null;
+                },
+              ),
+              TextFormField(
+                decoration: InputDecoration(labelText: 'Field 4'),
+                validator: (value) {
+                  if (value!.isEmpty) {
+                    return 'Please enter a value';
+                  }
+                  return null;
+                },
+              ),
+              SizedBox(height: 20),
+              Text('Group 3', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              TextFormField(
+                decoration: InputDecoration(labelText: 'Field 5'),
+                validator: (value) {
+                  if (value!.isEmpty) {
+                    return 'Please enter a value';
+                  }
+                  return null;
+                },
+              ),
+              TextFormField(
+                decoration: InputDecoration(labelText: 'Field 6'),
+                validator: (value) {
+                  if (value!.isEmpty) {
+                    return 'Please enter a value';
+                  }
+                  return null;
+                },
+              ),
+              SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () {
+                  if (_formKey.currentState!.validate()) {
+                    // TODO: Submit form
+                  }
+                },
+                child: Text('Submit'),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
