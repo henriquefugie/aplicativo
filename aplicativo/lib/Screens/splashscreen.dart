@@ -19,7 +19,7 @@ class _SplashScreenState extends State<SplashScreen> {
     var duration = const Duration(seconds: 5);
     return Timer(duration, () {
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (BuildContext context) => MyFormWidget()),
+        MaterialPageRoute(builder: (BuildContext context) => HomePage()),
       );
     });
   }
