@@ -23,14 +23,18 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   final _homeKey = GlobalKey<FormState>();
   bool _switchValue = false;
-  File? _imageFile;
-  final List<File> _imageList = [];
+  bool _switchValue1 = false;
+  bool _switchValue2 = false;
+  List<File> _imageList = [];
 
-  Future<void> _pickImage(ImageSource source) async {
-    final pickedFile = await ImagePicker().pickImage(source: source);
-    setState(() {
-      _imageFile = File(pickedFile!.path);
-    });
+  Future<void> _addImages() async {
+    final List<XFile>? images =
+        await ImagePicker().pickMultiImage(imageQuality: 50);
+    if (images != null) {
+      setState(() {
+        _imageList.addAll(images.map((image) => File(image.path)));
+      });
+    }
   }
 
   @override
@@ -38,18 +42,18 @@ class _HomePageState extends State<HomePage> {
     return Container(
       child: Scaffold(
         appBar: AppBar(
-          title: Text('Visita Técnica'),
+          title: const Text('Visita Técnica'),
         ),
         body: SingleChildScrollView(
           child: Padding(
-            padding: EdgeInsets.all(16.0),
+            padding: const EdgeInsets.all(16.0),
             child: Form(
               key: _homeKey,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   TextFormField(
-                    decoration: InputDecoration(labelText: 'Cliente:'),
+                    decoration: const InputDecoration(labelText: 'Cliente:'),
                     validator: (value) {
                       if (value!.isEmpty) {
                         return 'Please enter a value';
@@ -58,7 +62,7 @@ class _HomePageState extends State<HomePage> {
                     },
                   ),
                   TextFormField(
-                    decoration: InputDecoration(labelText: 'Morada:'),
+                    decoration: const InputDecoration(labelText: 'Morada:'),
                     validator: (value) {
                       if (value!.isEmpty) {
                         return 'Please enter a value';
@@ -67,7 +71,8 @@ class _HomePageState extends State<HomePage> {
                     },
                   ),
                   TextFormField(
-                    decoration: InputDecoration(labelText: 'Data da Visita:'),
+                    decoration:
+                        const InputDecoration(labelText: 'Data da Visita:'),
                     validator: (value) {
                       if (value!.isEmpty) {
                         return 'Please enter a value';
@@ -75,11 +80,10 @@ class _HomePageState extends State<HomePage> {
                       return null;
                     },
                   ),
-                  SizedBox(height: 20),
-                  Text('Rede',
+                  const SizedBox(height: 20),
+                  const Text('Rede',
                       style:
                           TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                  SizedBox(height: 20),
                   Row(
                     children: [
                       Expanded(
@@ -107,8 +111,8 @@ class _HomePageState extends State<HomePage> {
                     },
                   ),
                   TextFormField(
-                    decoration:
-                        InputDecoration(labelText: 'Potência contratada:'),
+                    decoration: const InputDecoration(
+                        labelText: 'Potência contratada:'),
                     validator: (value) {
                       if (value!.isEmpty) {
                         return 'Please enter a value';
@@ -116,39 +120,138 @@ class _HomePageState extends State<HomePage> {
                       return null;
                     },
                   ),
-                  SizedBox(height: 20),
-                  Text('Facturas'),
-                  GestureDetector(
-                    onTap: () {
-                      _pickImage(ImageSource.gallery);
-                    },
-                    child: Container(
-                      width: 200,
-                      height: 200,
-                      decoration: BoxDecoration(
-                        border: Border.all(
-                          color: Colors.grey,
-                          width: 1.0,
+                  const Text('Facturas'),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: GridView.count(
+                          crossAxisCount: 3,
+                          children: _imageList.map((image) {
+                            return Image.file(image);
+                          }).toList(),
                         ),
                       ),
-                      child: _imageFile != null
-                          ? Image.file(
-                              _imageFile!,
-                              fit: BoxFit.cover,
-                            )
-                          : Icon(
-                              Icons.add_a_photo,
-                              size: 50,
-                            ),
-                    ),
+                    ],
                   ),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: SizedBox(
+                          height: 20,
+                          child: ListView.builder(
+                            scrollDirection: Axis.horizontal,
+                            itemCount: _imageList.length,
+                            itemBuilder: (context, index) {
+                              return Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Image.file(
+                                  _imageList[index],
+                                  width: 100,
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  const Text('Baterias',
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 20),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          _switchValue1 ? 'Sim' : 'Não',
+                          textAlign: TextAlign.left,
+                        ),
+                      ),
+                    ],
+                  ),
+                  Switch(
+                    value: _switchValue1,
+                    onChanged: (value) {
+                      setState(() {
+                        _switchValue1 = value;
+                      });
+                    },
+                  ),
+                  const SizedBox(height: 20),
+                  const Text('Cobertura',
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 20),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          _switchValue2 ? 'Inclinada' : 'Plana',
+                          textAlign: TextAlign.left,
+                        ),
+                      ),
+                    ],
+                  ),
+                  Switch(
+                    value: _switchValue2,
+                    onChanged: (value) {
+                      setState(() {
+                        _switchValue2 = value;
+                      });
+                    },
+                  ),
+                  const Text('Caso a cobertura seja inclinada.',
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  TextFormField(
+                    decoration: const InputDecoration(
+                        labelText: 'Pé Direito da parte mais alta:'),
+                    validator: (value) {
+                      if (value!.isEmpty) {
+                        return 'Please enter a value';
+                      }
+                      return null;
+                    },
+                  ),
+                  TextFormField(
+                    decoration: const InputDecoration(
+                        labelText: 'Pé Direito da parte mais baixa:'),
+                    validator: (value) {
+                      if (value!.isEmpty) {
+                        return 'Please enter a value';
+                      }
+                      return null;
+                    },
+                  ),
+                  const Text('Distâncias',
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  TextFormField(
+                    decoration: const InputDecoration(labelText: 'Pé Direito:'),
+                    validator: (value) {
+                      if (value!.isEmpty) {
+                        return 'Please enter a value';
+                      }
+                      return null;
+                    },
+                  ),
+                  const Text('Quadros e passagens de cabos',
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  const Text('Fotos Adicionais',
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  const Text('Informações Adicionais',
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                   ElevatedButton(
                     onPressed: () {
                       if (_homeKey.currentState!.validate()) {
                         // TODO: Submit form
                       }
                     },
-                    child: Text('Submit'),
+                    child: const Text('Salvar'),
                   ),
                 ],
               ),
